@@ -1,0 +1,70 @@
+# Multi-Modal Tactile Material Classification (Daimon Sensor)
+
+Material classification from a Daimon GelSight-style optical tactile sensor using
+**four modalities** (raw image, depth, deformation, shear) and comparing
+**fusion strategies** (early, late, hybrid) against single-modality baselines.
+
+Includes a **ROS2 (`rclpy`) pipeline** and a **Jupyter notebook** that replay the
+recorded data, inject synthetic sensor noise, and reproduce all plots in the paper.
+
+## Dataset
+
+The dataset is large and is **not** stored in this repo. Download it here:
+
+**https://drive.google.com/drive/folders/1nCXCQ-5vT5xhaLr_t-zB0wl5gqR_cV6N?usp=drive_link**
+
+After downloading, place it in the project root so the structure looks like:
+
+```
+dataset/material=<name>/trial_<NNN>/{rawimg,depth,deformation,shear}.npy
+```
+
+## Files
+
+| File | What it does |
+|------|--------------|
+| `record.py` | Collect data from the live sensor |
+| `dataset_loader.py` | Load trials, build train/val/test splits |
+| `models.py` | 4 baselines + early / late / hybrid fusion models |
+| `train.py` | Train the models (→ `checkpoints/*.pt`) |
+| `evaluate.py` | Offline evaluation + plots |
+| `visualize.py` | Play back a recorded trial |
+| `live_predict.py` | Real-time prediction from the sensor |
+| `tactile_ros_nodes.py` | ROS2 publisher + classifier nodes |
+| `tactile_fusion_experiment.ipynb` | Notebook: ROS-driven experiment + plots |
+| `tactile_fusion_paper.tex` | Research paper (IEEE format) |
+
+## Requirements
+
+```bash
+pip install torch scikit-learn pandas numpy matplotlib seaborn scipy ipywidgets
+```
+Plus **ROS2 (Jazzy)** with `rclpy`, and the Daimon `dmrobotics` driver (for the
+live-sensor scripts only).
+
+## Usage
+
+**Train:**
+```bash
+python train.py --all
+```
+
+**Reproduce the paper (notebook):**
+```bash
+source /opt/ros/jazzy/setup.bash
+jupyter notebook        # then open tactile_fusion_experiment.ipynb
+```
+Set the paths in the CONFIG cell, then run all cells. Plots are saved to `results/`.
+
+**Live prediction (needs the sensor):**
+```bash
+python live_predict.py
+```
+
+## Notes
+
+- Splits are at the **trial level** (not frame level) to prevent data leakage.
+- The notebook keeps the **base data real** and only the **perturbations**
+  (noise, dropout) synthetic, under assumptions stated in the notebook and paper.
+
+**Student ID:** 8314923
